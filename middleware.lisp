@@ -43,6 +43,10 @@ length of the response body."
 																		:software-version (software-version)
 																		:features *features*))))
 
+(defun diagnostic-handler (request)
+	""
+	(diagnostic-response request nil))
+
 (defun wrap-diagnostic (request-handler)
 	"Middleware that always returns diagnostic information for the
 request and correponding response."
@@ -77,16 +81,17 @@ request and correponding response."
 
 ;;;
 
-(defun realise-body-response (response)
+(defun realise-body (response)
 	""
 	(typecase (braid:body response)
-		(pathname (setf (braid:body response) (alexandria:read-file-into-byte-vector (braid:body response)))))
+		(pathname (setf (braid:body response) (alexandria:read-file-into-byte-vector (braid:body response))))
+		(function (setf (braid:body response) (funcall (braid:body response)))))
 	response)
 
 (defun wrap-realise-body (request-handler)
 	"Middleware that "
 	(lambda (request)
-			(realise-body (funcall request-handler response))))
+			(realise-body-response (funcall request-handler request))))
 
 ;;;
 				
@@ -100,10 +105,19 @@ request and correponding response."
 			(cons response)
 			(t (braid:make-response :body (format nil "~a" response)))))
 
-(defun wrap-realise (request-handler)
+(defun wrap-realise-response (request-handler)
 	"Middleware that "
 	(lambda (request)
 		(realise-response (funcall request-handler request))))
+
+;;;
+(defun realise-request (request)
+	""
+	(typecase request
+		(string (braid:make-request :uri request))
+		(cons request)
+		(t (braid:make-response :body (format nil "~a" response)))))
+
 
 ;;;
 
@@ -114,9 +128,9 @@ request and correponding response."
 (defun condition-handler (condition request)
 	""
 	(braid:make-response :status 500
-											 :body (format nil "Internal Server Error~%Condition : ~s~%Request : ~s" condition request)))
+											 :body (format nil "Internal Server Error~%Condition : ~a ~%Request : ~s" condition request)))
 
-(defun wrap-conditions (request-handler &key (condition-handler default-condition-handler))
+(defun wrap-conditions (request-handler &key (condition-handler 'default-condition-handler))
 	"Middleware that masks any conditions raised by HANDLER and returns
 an internal server error response produced by the supplied
 CONDITION-HANDLER."
@@ -159,6 +173,34 @@ CONDITION-HANDLER."
 		(let ((response (funcall request-handler request)))
 			(funcall log-handler response)
 			response)))
+
+;;;
+
+(defun rfc-1123-date (&optional (time (get-universal-time)))
+  "Generates a time string according to RFC 1123. Default is current
+time."
+  (multiple-value-bind
+        (second minute hour date month year day-of-week)
+      (decode-universal-time time 0)
+    (format nil "~A, ~2,'0d ~A ~4d ~2,'0d:~2,'0d:~2,'0d GMT"
+            (svref #("Mon" "Tue" "Wed" "Thu" "Fri" "Sat" "Sun") day-of-week)
+            date
+            (svref #("Jan" "Feb" "Mar" "Apr" "May" "Jun" "Jul" "Aug" "Sep" "Oct" "Nov" "Dec") (1- month))
+            year
+            hour
+            minute
+            second)))
+
+(defun set-last-modified (response)
+	"If RESPONSE body is a pathname to a file, use its file-write-date to set the Last-Modified header."
+	(when (typep (braid:body response) 'pathname)
+		(setf (braid:header response :last-modified) (rfc-1123-date (file-write-date (braid:body response)))))
+	response)
+
+(defun wrap-last-modified (handler)
+	"Middleware to set the Last-Modified header for response bodies of type pathname."
+	(lambda (request)
+		(set-last-modified (funcall handler request))))
 
 ;;;
 

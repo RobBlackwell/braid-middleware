@@ -8,20 +8,23 @@
 	 #:set-content-length-response
 	 #:wrap-set-content-length
 	 #:diagnostic-response
+	 #:diagnostic-handler
 	 #:wrap-diagnostic
 	 #:wrap-set-headers
 	 #:wrap-set-header
 	 #:merge-headers-response
 	 #:wrap-merge-headers
-	 #:realise-body-response
+	 #:realise-body
 	 #:wrap-realise-body
 	 #:realise-response
-	 #:wrap-realise
+	 #:wrap-realise-response
 	 #:default-condition-handler
 	 #:condition-handler
 	 #:wrap-conditions
 	 #:wrap-head
 	 #:default-log-handler
 	 #:wrap-log
+	 #:set-last-modified
+	 #:wrap-last-modified
 	 #:wrap-request-handlers
 	 #:combine-request-handlers))
