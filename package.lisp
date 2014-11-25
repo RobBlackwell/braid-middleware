@@ -14,10 +14,8 @@
 	 #:wrap-set-header
 	 #:merge-headers-response
 	 #:wrap-merge-headers
-	 #:realise-body
-	 #:wrap-realise-body
-	 #:realise-response
-	 #:wrap-realise-response
+	 #:wrap-load-pathname-body
+	 #:wrap-ensure-response
 	 #:default-condition-handler
 	 #:condition-handler
 	 #:wrap-conditions

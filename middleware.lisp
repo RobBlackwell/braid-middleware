@@ -81,52 +81,31 @@ request and correponding response."
 
 ;;;
 
-(defun realise-body (response)
-	""
-	(typecase (braid:body response)
-		(pathname (setf (braid:body response) (alexandria:read-file-into-byte-vector (braid:body response))))
-		(function (setf (braid:body response) (funcall (braid:body response)))))
-	response)
 
-(defun wrap-realise-body (request-handler)
-	"Middleware that "
+
+(defun wrap-load-pathname-body (request-handler)
+	"Middleware that replaces a pathname body with a byte vector being
+the contents of the file designated by the pathname. "
 	(lambda (request)
-			(realise-body-response (funcall request-handler request))))
+			(braid:load-pathname-body (funcall request-handler request))))
 
 ;;;
-				
-(defun realise-response (response)
-	""
-	(typecase response
-			(string (braid:make-response :body response))
-			((simple-array (unsigned-byte 8)) (braid:make-response :body response))
-			(pathname (braid:make-response :body (alexandria:read-file-into-byte-vector response)))
-			(null (braid:make-response :status 404 :body "Not found"))
-			(cons response)
-			(t (braid:make-response :body (format nil "~a" response)))))
 
-(defun wrap-realise-response (request-handler)
-	"Middleware that "
+(defun wrap-ensure-response (request-handler)
+	"Middleware that turns a shorthand response such as a string or
+pathname into a full Braid response."
 	(lambda (request)
-		(realise-response (funcall request-handler request))))
-
-;;;
-(defun realise-request (request)
-	""
-	(typecase request
-		(string (braid:make-request :uri request))
-		(cons request)
-		(t (braid:make-response :body (format nil "~a" response)))))
-
+		(braid:ensure-response (funcall request-handler request))))
 
 ;;;
 
 (defun default-condition-handler (condition request)
-	""
+	"Returns a simple, production safe HTTP 500 Internal Server Error."
 	(braid:make-response :status 500 :body "Internal Server Error"))
 
 (defun condition-handler (condition request)
-	""
+	"Returns an HTTP 500 Internal Server Error with some information
+about the condition."
 	(braid:make-response :status 500
 											 :body (format nil "Internal Server Error~%Condition : ~a ~%Request : ~s" condition request)))
 
