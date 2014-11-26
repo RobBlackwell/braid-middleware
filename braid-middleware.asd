@@ -3,7 +3,8 @@
 (asdf:defsystem #:braid-middleware
 		:version "0.0.1"
 		:author "Rob Blackwell"
-		:description ""
+		:description "Higher order functions that add additional
+		functionality to Braid request handlers."
 		:serial t
 		:depends-on (#:alexandria
 								 #:puri
