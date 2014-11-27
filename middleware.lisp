@@ -181,6 +181,51 @@ time."
 	(lambda (request)
 		(set-last-modified (funcall handler request))))
 
+;;; Basic Authorization
+
+(defun set-basic-authorization (request username password)
+	"Sets the authorization header for REQUEST using basic auth and the
+supplied USERNAME and PASSWORD."
+	(setf (braid:header request :authorization)
+				(format nil "Basic ~A"
+								(base64:string-to-base64-string
+								 (format nil "~A:~A"
+												 username
+												 password))))
+	request)
+
+;; Borrowed from Hunchentoot ..
+
+(defun get-basic-authorization (request)
+  "Returns as two values the user and password \(if any) as encoded in
+the 'AUTHORIZATION' header.  Returns NIL if there is no such header."
+  (let* ((authorization (braid:header request :authorization))
+         (start (and authorization
+                     (> (length authorization) 5)
+                     (string-equal "Basic" authorization :end2 5)
+                     (cl-ppcre:scan "\\S" authorization :start 5))))
+    (when start
+      (destructuring-bind (&optional user password)
+          (cl-ppcre:split ":" (base64:base64-string-to-string (subseq authorization start)) :limit 2)
+        (values user password)))))
+
+(defun make-not-authorized-response (realm)
+	"Creates an HTTP 401 not-authorized response for the specified REALM."
+	(braid:make-response :status 401
+											 :headers (list :www-authenticate
+																			(format nil "Basic realm=\"~a\"" realm))))
+
+(defun wrap-basic-authorization (realm username-password-handler request-handler)
+	""
+	(lambda (request)
+			(multiple-value-bind (username password)
+					(get-basic-authorization request)
+				(if (funcall username-password-handler username password)
+						(funcall request-handler request)
+						(make-not-authorized-response realm)))))
+						
+
+
 ;;;
 
 (defun wrap-request-handlers (&rest request-handlers)

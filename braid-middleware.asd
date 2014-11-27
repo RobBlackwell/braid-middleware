@@ -12,6 +12,7 @@
 								 #:cl-fad
 								 #:trivial-backtrace
 								 #:cl-ppcre
+								 #:cl-base64
 								 #:braid)
 		:components ((:file "package")
 								 (:file "util")

@@ -24,5 +24,7 @@
 	 #:wrap-log
 	 #:set-last-modified
 	 #:wrap-last-modified
+	 #:set-basic-authorization
+	 #:wrap-basic-authorization
 	 #:wrap-request-handlers
 	 #:combine-request-handlers))
