@@ -26,5 +26,8 @@
 	 #:wrap-last-modified
 	 #:set-basic-authorization
 	 #:wrap-basic-authorization
+	 #:parse-query-params
+	 #:set-query-params
+	 #:wrap-set-query-params
 	 #:wrap-request-handlers
 	 #:combine-request-handlers))

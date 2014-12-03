@@ -224,6 +224,31 @@ the 'AUTHORIZATION' header.  Returns NIL if there is no such header."
 						(funcall request-handler request)
 						(make-not-authorized-response realm)))))
 						
+;;;
+
+(defun parse-query-params (request)
+	"Parses the query string from the REQUEST URI returning a plist of
+keys and values."
+	(let* ((query-string (puri:uri-query (puri:parse-uri (braid:uri request)))))
+		(loop for kv in (cl-ppcre:split "&" query-string) appending
+				 (let* ((p (position #\= kv))
+								(k (if p (subseq kv 0 p) kv))
+								(v (if p (subseq kv (1+ p)) "")))
+					 (list (alexandria:make-keyword (string-upcase k)) v)))))
+
+(defun set-query-params (request)
+	"Parses the query string from the REQUEST URI and stashes the
+resulting paraeters as a plist accessible via the :query-params key."
+	(if (eq (getf request :query-params :none) :none)
+			(cons :query-params (cons (parse-query-params request) request))
+			request))
+
+(defun wrap-set-query-params (handler)
+	"Middleware that parses the query string from the REQUEST URI and
+stashes the resulting paraeters as a plist accessible via
+the :query-params key."
+	(lambda (request)
+		(funcall handler (set-query-params request))))
 
 
 ;;;
