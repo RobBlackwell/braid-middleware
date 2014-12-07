@@ -48,19 +48,19 @@ VALUE."
       (merge-headers http-response headers)
       http-response)))
 
-(defun wrap-load-pathname-body (http-request-handler)
+(defun wrap-set-body-pathname-to-bytes (http-request-handler)
   "Middleware that replaces a pathname body with a byte vector being
 the contents of the file designated by the pathname. "
   (lambda (http-request)
     (let ((http-response (funcall http-request-handler http-request)))
-      (load-pathname-body http-response)
+      (set-body-pathname-to-bytes http-response)
       http-response)))
 
-(defun wrap-ensure-response (http-request-handler)
+(defun wrap-ensure-http-response (http-request-handler)
   "Middleware that turns a shorthand response such as a string or
 pathname into a full Braid response."
   (lambda (http-request)
-    (braid-util:ensure-response (funcall http-request-handler http-request))))
+    (braid-util:ensure-http-response (funcall http-request-handler http-request))))
 
 (defun wrap-conditions (http-request-handler &key (condition-handler 'make-default-condition-response))
   "Middleware that masks any conditions raised by HANDLER and returns
@@ -126,11 +126,11 @@ HTTP-REQUEST-HANDLER otherwise returns a not authorized response."
 	  (make-not-authorized-response realm)))))
 						
 
-(defun wrap-utf-8-bytes-to-string-body (http-request-handler)
+(defun wrap-set-body-utf-8-bytes-to-string (http-request-handler)
   "Middleware that converts a UTF-8 response body into a string."
   (lambda (http-request)
     (let ((http-response (funcall http-request-handler http-request)))
-      (utf-8-bytes-to-string-body http-response)
+      (set-body-utf-8-bytes-to-string http-response)
       http-response)))
 ;;;
 

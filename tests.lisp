@@ -1,13 +1,9 @@
 (ql:quickload :braid-middleware)
 
-(defun my-response ()
-	(braid:make-response :body (merge-pathnames (asdf:system-source-directory :braid-static) "README.md")))
+defpackage :braid-middleware-tests
+  (:use :cl :braid-middleware))
 
-(defun test1 ()
-	""
-	(let ((response	(braid-middleware:set-last-modified (my-response))))
-		(stringp (braid:header response :last-modified))))
-
+(in-package :braid-middleware-tests)
 
 ;; (test1)
 		
