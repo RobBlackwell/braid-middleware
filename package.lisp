@@ -6,9 +6,9 @@
    #:wrap-set-content-type
    #:wrap-set-content-length
    #:wrap-diagnostic
-   #:wrap-set-headers
-   #:wrap-set-header
-   #:wrap-merge-headers
+   #:wrap-set-response-headers
+   #:wrap-set-response-header
+   #:wrap-merge-response-headers
    #:wrap-load-pathname-body
    #:wrap-ensure-response
    #:wrap-conditions
@@ -22,5 +22,5 @@
    #:wrap-route
    #:*args*
    #:*arg*
-   #:wrap-http-request-handlers))
+   #:combine-http-request-handlers))
 
